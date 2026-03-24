@@ -1,0 +1,15 @@
+fastapi[standard]==0.135.1
+sqlalchemy==2.0.48
+pydantic==2.12.5
+pydantic-settings==2.13.1
+python-multipart==0.0.22
+
+pyjwt==2.12.1
+pwdlib[argon2]==0.3.0
+
+psycopg==3.3.3
+psycopg-binary==3.3.3
+
+python-dotenv==1.2.2
+
+pytest==9.0.2
