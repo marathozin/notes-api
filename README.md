@@ -1,60 +1,56 @@
-# Notes API
+## Стек
 
-RESTful API for managing notes with tags and authorization support.
-
-## Tech Stack
-
-- **FastAPI** — web framework
+- **FastAPI** — веб-фреймворк
 - **SQLAlchemy** — ORM
-- **PostgreSQL** — database
-- **Pydantic** — data validation
-- **Pytest** — testing
-- **Docker** — containerization
+- **PostgreSQL** — база данных
+- **Pydantic** — проверка данных
+- **Pytest** — тестирование
+- **Docker** — контейнеризация
 
-## Getting Started
+## Быстрый старт
 
-### 1. Clone the Repository
+### 1. Клонируйте репозиторий
 ```bash
 git clone https://github.com/marathozin/notes-api.git
 cd notes-api
 ```
 
-### 2. Environment Configuration
+### 2. Настройте окружение
 ```bash
 cp .env.example .env
 ```
 
-## Running with Docker
+## Запуск через Docker Compose
 ```bash
 docker compose up --build
 ```
 - API URL: http://localhost:8000
 - Interactive Docs: http://localhost:8000/docs
 
-## Local Development
+## Локальный заауск
 
-### 1. Create and activate a virtual environment:
+### 1. Создайте и активируйте виртуальную среду:
 ```bash
 python -m venv venv
 source venv/bin/activate
 ```
 
-### 2. Install dependencies:
+### 2. Установите зависимости:
 ```bash
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### 3. Start the development server:
+### 3. Запустите сервер:
 ```bash
 uvicorn app.main:app --reload
 ```
 
-## API Documentation
+## Документация API
 
 Interactive docs: `http://localhost:8000/docs`
 
-## Testing
+## Тестирование
 
 ```bash
 pytest
