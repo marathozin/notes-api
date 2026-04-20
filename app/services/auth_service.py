@@ -8,6 +8,8 @@ from app.core import settings, verify_password, get_password_hash, create_access
 
 
 class AuthService:
+    revoked_tokens: set[str] = set()
+
     @staticmethod
     def register_new_user(db: Session, user_data: UserCreate) -> models.User:
         """Регистрация нового пользователя"""
@@ -47,6 +49,17 @@ class AuthService:
         if not user or not verify_password(password, user.hashed_password):
             return None
         return user
+
+    @staticmethod
+    def logout(token: str) -> dict[str, str]:
+        """Выход из системы (отзыв токена)"""
+        AuthService.revoked_tokens.add(token)
+        return {"message": "Успешный выход из аккаунта"}
+
+    @staticmethod
+    def is_token_revoked(token: str) -> bool:
+        """Проверка, был ли токен отозван"""
+        return token in AuthService.revoked_tokens
 
     @staticmethod
     def login(db: Session, username: str, password: str):

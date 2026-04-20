@@ -112,3 +112,26 @@ def test_get_current_user_invalid_token(client):
         "/users/me", headers={"Authorization": "Bearer invalid_token"}
     )
     assert response.status_code == 401
+
+
+def test_logout_revokes_token(client):
+    """Тест выхода: токен становится невалидным"""
+    client.post(
+        "/auth/register",
+        json={
+            "email": "logout@test.com",
+            "username": "logoutuser",
+            "password": "pass123",
+        },
+    )
+    login_response = client.post(
+        "/auth/token", data={"username": "logoutuser", "password": "pass123"}
+    )
+    token = login_response.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    logout_response = client.post("/auth/logout", headers=headers)
+    assert logout_response.status_code == 200
+
+    me_response = client.get("/users/me", headers=headers)
+    assert me_response.status_code == 401

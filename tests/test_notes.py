@@ -204,3 +204,23 @@ def test_search_notes_no_results(client, auth_headers):
     response = client.get("/notes/search?query=nonexistent", headers=headers)
     assert response.status_code == 200
     assert response.json() == []
+
+
+def test_get_notes_pagination(client, auth_headers):
+    """Тест пагинации заметок: по умолчанию 10 на страницу"""
+    headers = auth_headers()
+
+    for i in range(12):
+        client.post(
+            "/notes",
+            headers=headers,
+            json={"title": f"Заметка {i}", "content": "Контент"},
+        )
+
+    first_page = client.get("/notes", headers=headers)
+    second_page = client.get("/notes?page=2", headers=headers)
+
+    assert first_page.status_code == 200
+    assert second_page.status_code == 200
+    assert len(first_page.json()) == 10
+    assert len(second_page.json()) == 2

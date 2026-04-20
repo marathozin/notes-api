@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from app.core.security import oauth2_scheme
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from app.db import get_db
@@ -30,3 +31,9 @@ def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
     return AuthService.login(db, form_data.username, form_data.password)
+
+
+@router.post("/logout")
+def logout(token: str = Depends(oauth2_scheme)):
+    """Выход из системы"""
+    return AuthService.logout(token)
