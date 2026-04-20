@@ -3,7 +3,6 @@ from app import schemas
 from app.db import models
 from app.api.deps import get_current_active_user
 
-
 router = APIRouter()
 
 

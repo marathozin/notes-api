@@ -3,7 +3,6 @@ from sqlalchemy import Table, Column, ForeignKey, String, Text, DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 
-
 note_tags = Table(
     "note_tags",
     Base.metadata,
@@ -16,15 +15,20 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
-    username: Mapped[str] = mapped_column(String(50), unique=True, index=True, nullable=False)
+    email: Mapped[str] = mapped_column(
+        String(255), unique=True, index=True, nullable=False
+    )
+    username: Mapped[str] = mapped_column(
+        String(50), unique=True, index=True, nullable=False
+    )
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
     is_active: Mapped[bool] = mapped_column(default=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
 
     notes: Mapped[list["Note"]] = relationship(
-        back_populates="owner",
-        cascade="all, delete-orphan"
+        back_populates="owner", cascade="all, delete-orphan"
     )
 
     def __repr__(self):
@@ -39,8 +43,7 @@ class Tag(Base):
     emoji: Mapped[str] = mapped_column(String(10), nullable=False)
 
     notes: Mapped[list["Note"]] = relationship(
-        secondary=note_tags,
-        back_populates="tags"
+        secondary=note_tags, back_populates="tags"
     )
 
     def __repr__(self):
@@ -54,20 +57,18 @@ class Note(Base):
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     user_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"),
-        nullable=False
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), 
-        server_default=func.now(), 
-        onupdate=func.now()
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
     owner: Mapped["User"] = relationship(back_populates="notes")
     tags: Mapped[list["Tag"]] = relationship(
-        secondary=note_tags,
-        back_populates="notes"
+        secondary=note_tags, back_populates="notes"
     )
 
     def __repr__(self):

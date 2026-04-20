@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 from app.db import models
 
+
 class TagService:
     @staticmethod
     def get_tags(db: Session):

@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from app.db import Base, get_db, models
 from app.main import app
@@ -66,6 +66,7 @@ def base_client():
 @pytest.fixture
 def get_auth_token(client):
     """Fixture для получения токена авторизации"""
+
     def _get_token(username="testuser", password="testpass"):
         # Регистрация
         client.post(
@@ -73,25 +74,26 @@ def get_auth_token(client):
             json={
                 "email": f"{username}@test.com",
                 "username": username,
-                "password": password
-            }
+                "password": password,
+            },
         )
         # Логин
         response = client.post(
-            "/auth/token",
-            data={"username": username, "password": password}
+            "/auth/token", data={"username": username, "password": password}
         )
         return response.json()["access_token"]
-    
+
     return _get_token
 
 
 @pytest.fixture
 def auth_headers(get_auth_token):
     """Fixture для получения headers с токеном авторизации"""
+
     def _headers(username="testuser", password="testpass"):
         token = get_auth_token(username, password)
         return {"Authorization": f"Bearer {token}"}
+
     return _headers
 
 
@@ -101,5 +103,5 @@ def sample_note_data():
     return {
         "title": "Тестовая заметка",
         "content": "Это содержимое тестовой заметки",
-        "tag_ids": []
+        "tag_ids": [],
     }

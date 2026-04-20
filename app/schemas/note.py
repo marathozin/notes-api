@@ -3,8 +3,11 @@ from datetime import datetime
 from .tag import Tag
 from .user import User
 
+
 class NoteBase(BaseModel):
-    title: str = Field(..., min_length=1, max_length=200, description="Название заметки")
+    title: str = Field(
+        ..., min_length=1, max_length=200, description="Название заметки"
+    )
     content: str = Field(..., min_length=1, description="Содержимое заметки")
 
 
@@ -25,9 +28,7 @@ class Note(NoteBase):
     updated_at: datetime | None = None
     tags: list[Tag] = []
 
-    model_config = {
-        'from_attributes': True
-    }
+    model_config = {"from_attributes": True}
 
 
 class NoteWithOwner(Note):

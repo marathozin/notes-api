@@ -4,8 +4,8 @@ from app.db.base import get_db
 from app.schemas import Tag
 from app.services import TagService
 
-
 router = APIRouter()
+
 
 @router.get("/", response_model=list[Tag])
 def get_tags(db: Session = Depends(get_db)):

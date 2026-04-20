@@ -6,22 +6,22 @@
 def test_filter_notes_by_preset_tags(client, auth_headers):
     """Тест фильтрации заметок по предустановленным тегам"""
     headers = auth_headers()
-    
+
     tags = client.get("/tags").json()
     work_tag = next(tag for tag in tags if tag["name"] == "работа")
     fav_tag = next(tag for tag in tags if tag["name"] == "избранное")
-    
+
     client.post(
         "/notes",
         headers=headers,
-        json={"title": "Рабочая", "content": "...", "tag_ids": [work_tag["id"]]}
+        json={"title": "Рабочая", "content": "...", "tag_ids": [work_tag["id"]]},
     )
     client.post(
         "/notes",
         headers=headers,
-        json={"title": "Личная", "content": "...", "tag_ids": [fav_tag["id"]]}
+        json={"title": "Личная", "content": "...", "tag_ids": [fav_tag["id"]]},
     )
-    
+
     response = client.get(f"/notes?tag_ids={work_tag['id']}", headers=headers)
     assert response.status_code == 200
     notes = response.json()
@@ -32,29 +32,28 @@ def test_filter_notes_by_preset_tags(client, auth_headers):
 def test_filter_notes_by_multiple_tags(client, auth_headers):
     """Тест фильтрации заметок по нескольким тегам"""
     headers = auth_headers()
-    
+
     tags = client.get("/tags").json()
     work_tag = next(tag for tag in tags if tag["name"] == "работа")
     fav_tag = next(tag for tag in tags if tag["name"] == "избранное")
-    
+
     client.post(
         "/notes",
         headers=headers,
         json={
             "title": "Важная работа",
             "content": "...",
-            "tag_ids": [work_tag["id"], fav_tag["id"]]
-        }
+            "tag_ids": [work_tag["id"], fav_tag["id"]],
+        },
     )
     client.post(
         "/notes",
         headers=headers,
-        json={"title": "Просто работа", "content": "...", "tag_ids": [work_tag["id"]]}
+        json={"title": "Просто работа", "content": "...", "tag_ids": [work_tag["id"]]},
     )
-    
+
     response = client.get(
-        f"/notes?tag_ids={work_tag['id']},{fav_tag['id']}",
-        headers=headers
+        f"/notes?tag_ids={work_tag['id']},{fav_tag['id']}", headers=headers
     )
     assert response.status_code == 200
     notes = response.json()
@@ -64,18 +63,16 @@ def test_filter_notes_by_multiple_tags(client, auth_headers):
 def test_add_tag_to_note(client, auth_headers):
     """Тест добавления тега к заметке"""
     headers = auth_headers()
-    
+
     # Создание заметки без тегов
     note = client.post(
-        "/notes",
-        headers=headers,
-        json={"title": "Заметка", "content": "Контент"}
+        "/notes", headers=headers, json={"title": "Заметка", "content": "Контент"}
     ).json()
-    
+
     # Получение тега
     tags = client.get("/tags").json()
     tag = next(tag for tag in tags if tag["name"] == "избранное")
-    
+
     # Добавление тега к заметке
     response = client.post(f"/notes/{note['id']}/tags/{tag['id']}", headers=headers)
     assert response.status_code == 200
@@ -86,20 +83,18 @@ def test_add_tag_to_note(client, auth_headers):
 def test_add_multiple_tags_to_note(client, auth_headers):
     """Тест добавления нескольких тегов к заметке"""
     headers = auth_headers()
-    
+
     note = client.post(
-        "/notes",
-        headers=headers,
-        json={"title": "Заметка", "content": "Контент"}
+        "/notes", headers=headers, json={"title": "Заметка", "content": "Контент"}
     ).json()
-    
+
     tags = client.get("/tags").json()
     tag1 = next(tag for tag in tags if tag["name"] == "работа")
     tag2 = next(tag for tag in tags if tag["name"] == "избранное")
-    
+
     client.post(f"/notes/{note['id']}/tags/{tag1['id']}", headers=headers)
     response = client.post(f"/notes/{note['id']}/tags/{tag2['id']}", headers=headers)
-    
+
     assert response.status_code == 200
     assert len(response.json()["tags"]) == 2
 
@@ -107,16 +102,16 @@ def test_add_multiple_tags_to_note(client, auth_headers):
 def test_add_duplicate_tag_to_note(client, auth_headers):
     """Тест добавления дублирующегося тега к заметке"""
     headers = auth_headers()
-    
+
     tags = client.get("/tags").json()
     tag = next(tag for tag in tags if tag["name"] == "работа")
-    
+
     note = client.post(
         "/notes",
         headers=headers,
-        json={"title": "Заметка", "content": "...", "tag_ids": [tag["id"]]}
+        json={"title": "Заметка", "content": "...", "tag_ids": [tag["id"]]},
     ).json()
-    
+
     response = client.post(f"/notes/{note['id']}/tags/{tag['id']}", headers=headers)
     assert response.status_code == 200
     # Количество тегов не должно увеличиться
@@ -126,16 +121,16 @@ def test_add_duplicate_tag_to_note(client, auth_headers):
 def test_remove_tag_from_note(client, auth_headers):
     """Тест удаления тега из заметки"""
     headers = auth_headers()
-    
+
     tags = client.get("/tags").json()
     tag = next(tag for tag in tags if tag["name"] == "работа")
-    
+
     note = client.post(
         "/notes",
         headers=headers,
-        json={"title": "Заметка", "content": "...", "tag_ids": [tag["id"]]}
+        json={"title": "Заметка", "content": "...", "tag_ids": [tag["id"]]},
     ).json()
-    
+
     # Удаление тега
     response = client.delete(f"/notes/{note['id']}/tags/{tag['id']}", headers=headers)
     assert response.status_code == 200
@@ -145,13 +140,11 @@ def test_remove_tag_from_note(client, auth_headers):
 def test_remove_nonexistent_tag_from_note(client, auth_headers):
     """Тест удаления несуществующего тега из заметки"""
     headers = auth_headers()
-    
+
     note = client.post(
-        "/notes",
-        headers=headers,
-        json={"title": "Заметка", "content": "Контент"}
+        "/notes", headers=headers, json={"title": "Заметка", "content": "Контент"}
     ).json()
-    
+
     # Попытка удалить тег, которого нет
     tags = client.get("/tags").json()
     tag = tags[0]
@@ -164,24 +157,24 @@ def test_remove_nonexistent_tag_from_note(client, auth_headers):
 def test_update_note_tags(client, auth_headers):
     """Тест обновления тегов заметки через PUT"""
     headers = auth_headers()
-    
+
     tags = client.get("/tags").json()
     tag1 = next(tag for tag in tags if tag["name"] == "работа")
     tag2 = next(tag for tag in tags if tag["name"] == "избранное")
     tag3 = next(tag for tag in tags if tag["name"] == "срочно")
-    
+
     note = client.post(
         "/notes",
         headers=headers,
-        json={"title": "Заметка", "content": "...", "tag_ids": [tag1["id"]]}
+        json={"title": "Заметка", "content": "...", "tag_ids": [tag1["id"]]},
     ).json()
-    
+
     response = client.put(
         f"/notes/{note['id']}",
         headers=headers,
-        json={"tag_ids": [tag2["id"], tag3["id"]]}
+        json={"tag_ids": [tag2["id"], tag3["id"]]},
     )
-    
+
     assert response.status_code == 200
     assert len(response.json()["tags"]) == 2
     tag_names = [tag["name"] for tag in response.json()["tags"]]
@@ -193,27 +186,23 @@ def test_update_note_tags(client, auth_headers):
 def test_clear_all_tags_from_note(client, auth_headers):
     """Тест удаления всех тегов из заметки"""
     headers = auth_headers()
-    
+
     tags = client.get("/tags").json()
     tag1 = next(tag for tag in tags if tag["name"] == "работа")
     tag2 = next(tag for tag in tags if tag["name"] == "избранное")
-    
+
     note = client.post(
         "/notes",
         headers=headers,
         json={
             "title": "Заметка",
             "content": "...",
-            "tag_ids": [tag1["id"], tag2["id"]]
-        }
+            "tag_ids": [tag1["id"], tag2["id"]],
+        },
     ).json()
-    
+
     # Удаление всех тегов
-    response = client.put(
-        f"/notes/{note['id']}",
-        headers=headers,
-        json={"tag_ids": []}
-    )
-    
+    response = client.put(f"/notes/{note['id']}", headers=headers, json={"tag_ids": []})
+
     assert response.status_code == 200
     assert len(response.json()["tags"]) == 0

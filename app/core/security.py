@@ -4,7 +4,6 @@ from fastapi.security import OAuth2PasswordBearer
 from pwdlib import PasswordHash
 from app.core import settings
 
-
 # Конфигурация JWT
 SECRET_KEY = settings.DATABASE_URL
 ALGORITHM = settings.ALGORITHM
