@@ -23,40 +23,33 @@ PRESET_TAGS = [
 ]
 
 
-def override_get_db():
-    try:
-        db = TestingSessionLocal()
-        yield db
-    finally:
-        db.close()
-
-
-app.dependency_overrides[get_db] = override_get_db
+@pytest.fixture(scope="session", autouse=True)
+def setup_database():
+    Base.metadata.create_all(bind=engine)
+    yield
+    Base.metadata.drop_all(bind=engine)
 
 
 @pytest.fixture(autouse=True)
-def setup_database():
-    """Создание и очистка базы данных перед каждым тестом"""
-    Base.metadata.create_all(bind=engine)
-    
-    db = TestingSessionLocal()
-    try:
-        for tag_data in PRESET_TAGS:
-            # Проверяем, существует ли тег
-            existing_tag = db.execute(select(models.Tag).where(
-                models.Tag.name == tag_data["name"]
-            )).scalars().first()
-            
-            if not existing_tag:
-                tag = models.Tag(**tag_data)
-                db.add(tag)
-        
-        db.commit()
-    finally:
-        db.close()
-    yield
-    
-    Base.metadata.drop_all(bind=engine)
+def db_session():
+    connection = engine.connect()
+    transaction = connection.begin()
+    session = TestingSessionLocal(bind=connection)
+
+    for tag_data in PRESET_TAGS:
+        session.add(models.Tag(**tag_data))
+    session.commit()
+
+    def override_get_db():
+        yield session
+
+    app.dependency_overrides[get_db] = override_get_db
+
+    yield session
+
+    session.close()
+    transaction.rollback()
+    connection.close()
 
 
 @pytest.fixture()
@@ -64,9 +57,11 @@ def client():
     """Fixture для TestClient"""
     return TestClient(app, base_url="http://testserver/api/v1")
 
+
 @pytest.fixture
 def base_client():
     return TestClient(app, base_url="http://testserver")
+
 
 @pytest.fixture
 def get_auth_token(client):

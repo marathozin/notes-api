@@ -8,7 +8,6 @@ def test_filter_notes_by_preset_tags(client, auth_headers):
     headers = auth_headers()
     
     tags = client.get("/tags").json()
-    print(type(tags), tags) # Посмотрите, что здесь на самом деле
     work_tag = next(tag for tag in tags if tag["name"] == "работа")
     fav_tag = next(tag for tag in tags if tag["name"] == "избранное")
     
