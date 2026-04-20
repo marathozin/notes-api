@@ -6,6 +6,7 @@ from sqlalchemy import select
 from app.schemas import TokenData
 from app.db import get_db, models
 from app.core.security import oauth2_scheme, SECRET_KEY, ALGORITHM
+from app.services import AuthService
 
 
 async def get_current_user(
@@ -17,6 +18,9 @@ async def get_current_user(
         detail="Не удалось проверить учетные данные",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    if AuthService.is_token_revoked(token):
+        raise credentials_exception
+
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")

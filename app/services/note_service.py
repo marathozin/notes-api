@@ -31,8 +31,8 @@ class NoteService:
     def get_notes(
         db: Session,
         current_user: models.User,
-        skip: int = 0,
-        limit: int = 100,
+        page: int = 1,
+        per_page: int = 10,
         tag_ids: str | None = None,
     ):
         """Получить заметки текущего пользователя с опциональной фильтрацией по тегам
@@ -40,13 +40,15 @@ class NoteService:
         tag_ids: ID тегов через запятую, например: "1,2,3"
         """
         stmt = select(models.Note).where(models.Note.user_id == current_user.id)
+        stmt = stmt.order_by(models.Note.id)
 
         # Фильтрация по тегам
         if tag_ids:
             tag_id_list = [int(tid.strip()) for tid in tag_ids.split(",")]
             stmt = stmt.join(models.Note.tags).where(models.Tag.id.in_(tag_id_list))
 
-        stmt = stmt.offset(skip).limit(limit)
+        offset = max(page - 1, 0) * per_page
+        stmt = stmt.offset(offset).limit(per_page)
         notes = db.execute(stmt).scalars().all()
         return notes
 

@@ -21,8 +21,8 @@ def create_note(
 
 @router.get("/", response_model=list[Note])
 def get_notes(
-    skip: int = 0,
-    limit: int = 100,
+    page: int = 1,
+    per_page: int = 10,
     tag_ids: str | None = None,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_active_user),
@@ -31,7 +31,7 @@ def get_notes(
 
     tag_ids: ID тегов через запятую, например: "1,2,3"
     """
-    return NoteService.get_notes(db, current_user, skip, limit, tag_ids)
+    return NoteService.get_notes(db, current_user, page, per_page, tag_ids)
 
 
 @router.get("/search", response_model=list[Note])
